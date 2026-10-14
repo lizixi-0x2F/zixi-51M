@@ -70,7 +70,8 @@ def g2p(text):
     sentences = [i for i in re.split(pattern, text) if i.strip() != ""]
     phones, tones, word2ph = _g2p(sentences)
     assert sum(word2ph) == len(phones)
-    assert len(word2ph) == len(text)  # Sometimes it will crash,you can add a try-catch.
+    # ASCII letters are dropped in _g2p (no phones), so compare against the text without them.
+    assert len(word2ph) == len(re.sub(r"[a-zA-Z]", "", text))
     phones = ["_"] + phones + ["_"]
     tones = [0] + tones + [0]
     word2ph = [1] + word2ph + [1]
@@ -103,7 +104,6 @@ def _g2p(segments):
         seg_cut = tone_modifier.pre_merge_for_modify(seg_cut)
         for word, pos in seg_cut:
             if pos == "eng":
-                import pdb; pdb.set_trace()
                 continue
             sub_initials, sub_finals = _get_initials_finals(word)
             sub_finals = tone_modifier.modified_tone(word, pos, sub_finals)
